@@ -155,17 +155,19 @@ export interface AANextEpoch {
 
 function handleNextEpoch(state: AppState, action: AANextEpoch): AppState {
   return produce(state, (draft) => {
-    // +1 epoch:
-    // reset all species pools to max
-    for (const species of lineage(draft.rootSpecies)) {
-      species.freeMutationPoints = draft.overWorld.getMaxGenePool(species);
-      if (species.freeMutationPoints > 0) {
-        // on the very first time you move an epoch, you get one chance to get transport/pipes/diffuse water
-        const isFirstChoice = draft.epoch === 0;
-        species.geneOptions = generateGeneOptions(species, isFirstChoice);
+    if (draft.epoch <= draft.overWorld.getHexesPopulatedBy(draft.rootSpecies).length){
+      // +1 epoch:
+      // reset all species pools to max
+      for (const species of lineage(draft.rootSpecies)) {
+        species.freeMutationPoints = draft.overWorld.getMaxGenePool(species);
+        if (species.freeMutationPoints > 0) {
+          // on the very first time you move an epoch, you get one chance to get transport/pipes/diffuse water
+          const isFirstChoice = draft.epoch === 0;
+          species.geneOptions = generateGeneOptions(species, isFirstChoice);
+        }
       }
+      draft.epoch += 1;
     }
-    draft.epoch += 1;
   });
 }
 
